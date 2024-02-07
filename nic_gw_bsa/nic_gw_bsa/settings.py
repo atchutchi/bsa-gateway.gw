@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-$=lk@i8v0+-0ll#t)pt-z(cn(7at0=)#ykqb#@egu5k(4p&mc=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['8000-atchutchi-bsagatewaygw-tqyvwr47jty.ws-eu108.gitpod.io']
 
 
 BSA_API_KEY = os.getenv('BSA_API_KEY')

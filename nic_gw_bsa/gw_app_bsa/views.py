@@ -6,6 +6,8 @@ import json
 import requests
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.views import View
 
 # View para listar todos os domínios
 @require_http_methods(["GET"])
@@ -40,3 +42,48 @@ def autenticar_bsa(request):
         return JsonResponse({'token': token})
     else:
         return JsonResponse({'error': 'Falha ao autenticar'}, status=401)
+
+
+# View para atualizar a lista de nomes indisponíveis
+@method_decorator(csrf_exempt, name='dispatch')
+class AtualizarNomesIndisponiveisView(View):
+    
+    def post(self, request):
+        # Supondo que 'zone' e 'registered' são passados no corpo da requisição
+        data = json.loads(request.body)
+        url = f"https://api-ote.bsagateway.co/bsa/api/unavailableNames&action=add&zone={data['zone']}"
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {self.obter_token()}'
+        }
+        response = requests.post(url, headers=headers, json=data['registered'])
+
+        if response.status_code == 200:
+            return JsonResponse({'message': 'Nomes atualizados com sucesso.'})
+        else:
+            return JsonResponse({'error': 'Erro ao atualizar nomes.'}, status=response.status_code)
+
+    def obter_token(self):
+        # Implemente a lógica para obter o token aqui
+        return 'TOKEN_OBTIDO_DE_ALGUM_MODO'
+
+# View para recuperar subordens pendentes
+@method_decorator(csrf_exempt, name='dispatch')
+class RecuperarSubordensPendentesView(View):
+    
+    def get(self, request):
+        url = "https://api-ote.bsagateway.co/bsa/api/blockrsporder?sortBy=createdDt&order=asc&offset=0&limit=10000&q=blockOrderStatus.name=PendingActivation"
+        headers = {
+            'Authorization': f'Bearer {self.obter_token()}'
+        }
+        response = requests.get(url, headers=headers)
+
+        if response.status_code == 200:
+            subordens = response.json()
+            return JsonResponse(subordens)
+        else:
+            return JsonResponse({'error': 'Erro ao recuperar subordens.'}, status=response.status_code)
+
+    def obter_token(self):
+        # Implemente a lógica para obter o token aqui
+        return 'TOKEN_OBTIDO_DE_ALGUM_MODO'
